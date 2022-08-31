@@ -20,16 +20,17 @@ def scrape_page(url,condition,locator):
     try:
         browser.get(url)
         wait.until(condition(locator))
-    except:
+    except TimeoutException:
         logging.error('error while %s',url,exc_info=True)
+
 def scrape_index(page):
-    url = INDEX_URL.format(page = page )
+    url = INDEX_URL.format(page=page)
     scrape_page(url,condition=EC.visibility_of_all_elements_located,locator=(By.CSS_SELECTOR,'#index.item'))
 
 def parse_index():
-    elements = browser.find_elements_by_css_selector('#index.item.name')
+    elements = browser.find_elements_by_css_selector('#index .item .name')
     for element in elements:
-        href = element.get('href')
+        href = element.get_attribute('href')
         yield urljoin(INDEX_URL,href)
 def scrape_detail(url):
     scrape_page(url,condition=EC.visibility_of_element_located,locator=(By.TAG_NAME,'h2'))
@@ -44,11 +45,12 @@ def main():
      for page in range(1,TOTAL_PAGE):
        scrape_index(page)
        detail_urls=parse_index()
-     for detail_url in list(detail_urls):
+       logging.info('details url %s',list(detail_urls))
+     '''  for detail_url in list(detail_urls):
         scrape_detail(detail_url)
         detail_data = paese_detail()
         logging.info('%s',detail_data)
-
+'''
 
 
     finally:
